@@ -1,0 +1,7 @@
+name: 'Access Level Non Public'
+description: 'Protects the resources of datasets with non-public access level, on publicly accessible endpoints.'
+type: module
+core: 8.x
+package: DKAN
+dependencies:
+  - dkan:common
