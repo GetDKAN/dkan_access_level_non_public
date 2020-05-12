@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\access_level_non_public\Plugin\DataModifier;
+namespace Drupal\dkan_access_level_non_public\Plugin\DataModifier;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\access_level_non_public\Unit;
+namespace Drupal\Tests\dkan_access_level_non_public\Unit;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\ConditionInterface;
@@ -9,7 +9,7 @@ use Drupal\Core\Database\StatementInterface;
 use Drupal\Core\DependencyInjection\Container;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\common\Plugin\DataModifierBase;
-use Drupal\access_level_non_public\Plugin\DataModifier\NonPublicResourceProtector;
+use Drupal\dkan_access_level_non_public\Plugin\DataModifier\NonPublicResourceProtector;
 use MockChain\Chain;
 use MockChain\Options;
 use PHPUnit\Framework\TestCase;
