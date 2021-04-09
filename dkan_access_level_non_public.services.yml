@@ -1,0 +1,5 @@
+services:
+  dkan.access_level_non_public.event_subscriber:
+    class: \Drupal\dkan_access_level_non_public\EventSubscriber\Subscriber
+    tags:
+      - { name: event_subscriber }
