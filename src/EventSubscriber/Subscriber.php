@@ -86,6 +86,9 @@ class Subscriber implements EventSubscriberInterface {
       foreach ($dataset->distribution as $key => &$dist) {
         $dataset->distribution[$key] = $this->protectDistribution($dist);
       }
+      foreach ($dataset->{"%Ref:distribution"} as $key => &$dist) {
+        $dataset->{"%Ref:distribution"}[$key] = $this->protectDistribution($dist);
+      }
     }
     return $dataset;
   }
