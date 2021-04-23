@@ -66,7 +66,7 @@ class Subscriber implements EventSubscriberInterface {
     if (isset($data->distribution)) {
       $type = 'dataset';
     }
-    elseif (isset($data->downloadURL)) {
+    elseif (isset($data->downloadURL) || isset($data->data->downloadURL)) {
       $type = 'distribution';
     }
     return $type;
