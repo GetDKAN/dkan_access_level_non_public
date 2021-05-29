@@ -5,6 +5,7 @@ namespace Drupal\dkan_access_level_non_public\EventSubscriber;
 use Drupal\common\Events\Event;
 use Drupal\datastore\SqlEndpoint\WebServiceApi as DatastoreSqlController;
 use Drupal\metastore\Service as MetastoreService;
+use RootedData\RootedJsonData;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -35,10 +36,11 @@ class Subscriber implements EventSubscriberInterface {
   }
 
   public function onMetastoreDataGet(Event $event) {
-    $dataJson = $event->getData();
-    $data = json_decode($dataJson);
+    /* @var $data RootedJsonData */
+    $data = $event->getData();
 
     $type = $this->guessType($data);
+
     if ($data && $this->requiresModification($type, $data)) {
       switch($type) {
         case 'dataset':
@@ -50,7 +52,7 @@ class Subscriber implements EventSubscriberInterface {
       }
     }
 
-    $event->setData(json_encode($data));
+    $event->setData($data);
   }
 
   public function onDatastoreSqlRunQuery(Event $event) {
@@ -61,12 +63,12 @@ class Subscriber implements EventSubscriberInterface {
     }
   }
 
-  private function guessType(object $data): string {
+  private function guessType(RootedJsonData $data): string {
     $type = 'unknown';
-    if (isset($data->distribution)) {
+    if (isset($data->{'$.distribution'})) {
       $type = 'dataset';
     }
-    elseif (isset($data->downloadURL) || isset($data->data->downloadURL)) {
+    elseif (isset($data->{'$.downloadURL'}) || isset($data->{'$.data.downloadURL'})) {
       $type = 'distribution';
     }
     return $type;
@@ -81,16 +83,22 @@ class Subscriber implements EventSubscriberInterface {
    * @return object
    *   The protected dataset object
    */
-  private function protectDataset(object $dataset): object {
-    if (isset($dataset->distribution) && is_array($dataset->distribution)) {
-      foreach ($dataset->distribution as $key => &$dist) {
-        $dataset->distribution[$key] = $this->protectDistribution($dist);
-      }
-      foreach ($dataset->{"%Ref:distribution"} as $key => &$dist) {
-        $dataset->{"%Ref:distribution"}[$key] = $this->protectDistribution($dist);
+  private function protectDataset(RootedJsonData $dataset): RootedJsonData {
+    $json = "{$dataset}";
+
+    $object = json_decode($json);
+
+    $properties = ['distribution', '%Ref:distribution'];
+
+    foreach ($properties as $property) {
+      if (isset($object->{$property}) && is_array($object->{$property})) {
+        foreach ($object->{$property} as $key => &$dist) {
+          $object->{$property}[$key] = $this->protectDistribution((object) $dist);
+        }
       }
     }
-    return $dataset;
+
+    return new RootedJsonData(json_encode($object));
   }
 
   /**
@@ -166,7 +174,7 @@ class Subscriber implements EventSubscriberInterface {
    * @return bool
    *   TRUE if non-public, FALSE otherwise.
    */
-  private function accessLevel(string $schema, object $data) : string {
+  private function accessLevel(string $schema, RootedJsonData $data) : string {
     // For distributions, check their parent dataset's access level.
     if ('distribution' === $schema) {
       return $this->parentDatasetAccessLevel($data);
@@ -183,11 +191,8 @@ class Subscriber implements EventSubscriberInterface {
    * @return string
    *   The access level of the dataset.
    */
-  private function datasetAccessLevel($data) {
-    if (is_string($data)) {
-      $data = json_decode($data);
-    }
-    return $data->accessLevel;
+  private function datasetAccessLevel(RootedJsonData $data) {
+    return $data->{'$.accessLevel'};
   }
 
   /**
