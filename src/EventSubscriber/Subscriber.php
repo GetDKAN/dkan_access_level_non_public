@@ -58,7 +58,7 @@ class Subscriber implements EventSubscriberInterface {
   public function onDatastoreSqlRunQuery(Event $event) {
     $distributionUuid = $event->getData();
     $datasetJson = $this->getDistributionsDataset($distributionUuid);
-    if ($datasetJson && $this->requiresModification('dataset', json_decode($datasetJson))) {
+    if ($datasetJson && $this->requiresModification('dataset', new RootedJsonData($datasetJson))) {
       $event->setException(new \Exception("Can't access the datastore"));
     }
   }
